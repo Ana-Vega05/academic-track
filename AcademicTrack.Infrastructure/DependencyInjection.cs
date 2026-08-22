@@ -8,8 +8,8 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("Default")
-                               ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'Default'.");
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+                               ?? throw new InvalidOperationException("No se encontró la cadena de conexión 'DefaultConnection'.");
 
         services.AddDbContext<AcademicTrackDbContext>(options =>
             options.UseNpgsql(connectionString));
