@@ -21,6 +21,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\AcademicTrack.Domain\AcademicTrack.Domain.csproj" />
+      <ProjectReference Include="..\AcademicTrack.Application\AcademicTrack.Application.csproj" />
     </ItemGroup>
 
 </Project>

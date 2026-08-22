@@ -22,6 +22,10 @@ public class AcademicTrackDbContext : DbContext
     public DbSet<Innovacion> Innovaciones => Set<Innovacion>();
     public DbSet<InnovacionVinculacion> InnovacionVinculaciones => Set<InnovacionVinculacion>();
     public DbSet<IndicadorMatricula> IndicadoresMatricula => Set<IndicadorMatricula>();
+    public DbSet<SeguimientoCohorte> SeguimientosCohorte => Set<SeguimientoCohorte>();
+    public DbSet<PerdidaAsignatura> PerdidasAsignatura => Set<PerdidaAsignatura>();
+    public DbSet<SeguimientoEgresado> SeguimientosEgresado => Set<SeguimientoEgresado>();
+    public DbSet<DistribucionEgresado> DistribucionesEgresado => Set<DistribucionEgresado>();
     public DbSet<ActividadExtension> ActividadesExtension => Set<ActividadExtension>();
     public DbSet<ActividadExtensionVinculacion> ActividadExtensionVinculaciones => Set<ActividadExtensionVinculacion>();
     public DbSet<Publicacion> Publicaciones => Set<Publicacion>();
@@ -31,6 +35,189 @@ public class AcademicTrackDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+
+modelBuilder.Entity<SeguimientoCohorte>(entity =>
+{
+    entity.ToTable("seguimiento_cohorte");
+
+    entity.HasKey(e => e.Id);
+
+    entity.Property(e => e.SemestreSeguimiento)
+        .IsRequired();
+
+    entity.Property(e => e.Ingresaron)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Continuaron)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Cancelaciones)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Repitentes)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.CambiosPrograma)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Desertores)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Graduados)
+        .HasDefaultValue(0);
+
+    entity.HasOne<Programa>()
+        .WithMany()
+        .HasForeignKey(e => e.ProgramaId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    entity.HasOne<PeriodoAcademico>()
+        .WithMany()
+        .HasForeignKey(e => e.PeriodoCohorteId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    entity.HasIndex(
+        e => new
+        {
+            e.ProgramaId,
+            e.PeriodoCohorteId,
+            e.SemestreSeguimiento
+        },
+        "uq_seguimiento_cohorte"
+    ).IsUnique();
+});
+
+modelBuilder.Entity<PerdidaAsignatura>(entity =>
+{
+    entity.ToTable("perdida_asignatura");
+
+    entity.HasKey(e => e.Id);
+
+    entity.Property(e => e.Asignatura)
+        .IsRequired()
+        .HasMaxLength(200);
+
+    entity.Property(e => e.Matriculados)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Aprobados)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Reprobados)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.PorcentajePerdida)
+        .HasColumnType("decimal(6,4)");
+
+    entity.HasOne<Programa>()
+        .WithMany()
+        .HasForeignKey(e => e.ProgramaId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    entity.HasOne<PeriodoAcademico>()
+        .WithMany()
+        .HasForeignKey(e => e.PeriodoId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    entity.HasIndex(
+        e => new
+        {
+            e.ProgramaId,
+            e.PeriodoId,
+            e.Asignatura
+        },
+        "uq_perdida_asignatura"
+    ).IsUnique();
+});
+
+modelBuilder.Entity<SeguimientoEgresado>(entity =>
+{
+    entity.ToTable("seguimiento_egresado");
+
+    entity.HasKey(e => e.Id);
+
+    entity.Property(e => e.AnioGraduacion)
+        .HasColumnType("smallint");
+
+    entity.Property(e => e.TotalEgresados)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.Empleados)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.EmpleadosRelacionadosCarrera)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.EmpleadosNoRelacionadosCarrera)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.TiempoPromedioConseguirEmpleoMeses)
+        .HasColumnType("decimal(6,2)");
+
+    entity.Property(e => e.ContratoIndefinido)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.ContratoTerminoFijo)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.ContratoPrestacionServicios)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.ContratoOtro)
+        .HasDefaultValue(0);
+
+    entity.Property(e => e.ContinuanEstudios)
+        .HasDefaultValue(0);
+
+    entity.HasOne<Programa>()
+        .WithMany()
+        .HasForeignKey(e => e.ProgramaId)
+        .OnDelete(DeleteBehavior.Restrict);
+
+    entity.HasIndex(
+        e => new
+        {
+            e.ProgramaId,
+            e.AnioGraduacion
+        },
+        "uq_seguimiento_egresado"
+    ).IsUnique();
+});
+
+modelBuilder.Entity<DistribucionEgresado>(entity =>
+{
+    entity.ToTable("distribucion_egresado");
+
+    entity.HasKey(e => e.Id);
+
+    entity.Property(e => e.Tipo)
+        .IsRequired()
+        .HasMaxLength(30);
+
+    entity.Property(e => e.Categoria)
+        .IsRequired()
+        .HasMaxLength(200);
+
+    entity.Property(e => e.Cantidad)
+        .HasDefaultValue(0);
+
+    entity.HasOne<SeguimientoEgresado>()
+        .WithMany()
+        .HasForeignKey(e => e.SeguimientoEgresadoId)
+        .OnDelete(DeleteBehavior.Cascade);
+
+    entity.HasIndex(
+        e => new
+        {
+            e.SeguimientoEgresadoId,
+            e.Tipo,
+            e.Categoria
+        },
+        "uq_distribucion_egresado"
+    ).IsUnique();
+});
+
 
         modelBuilder.Entity<Programa>(entity =>
         {
