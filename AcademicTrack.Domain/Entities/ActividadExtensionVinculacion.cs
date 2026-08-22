@@ -1,9 +1,11 @@
-﻿namespace AcademicTrack.Domain.Entities;
+﻿using AcademicTrack.Domain.Enums;
+
+namespace AcademicTrack.Domain.Entities;
 
 public class ActividadExtensionVinculacion
 {
     public int Id { get; set; }
     public int ActividadId { get; set; }
-    public string TipoActor { get; set; } = string.Empty; // "Estudiante", "Docente", "Egresado", "Administrativo"
+    public TipoActor TipoActor { get; set; }
     public short Cantidad { get; set; } = 0;
 }

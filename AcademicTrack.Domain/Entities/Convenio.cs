@@ -1,4 +1,6 @@
-﻿namespace AcademicTrack.Domain.Entities;
+﻿using AcademicTrack.Domain.Enums;
+
+namespace AcademicTrack.Domain.Entities;
 
 public class Convenio
 {
@@ -10,6 +12,6 @@ public class Convenio
     public string? LogroResultados { get; set; }
     public int? NumUsuarios { get; set; }
     public string? Vigencia { get; set; }
-    public string Tipo { get; set; } = string.Empty; // "Nacional" / "Internacional"
-    public string Estado { get; set; } = string.Empty; // "Activo" / "Inactivo"
+    public TipoConvenio Tipo { get; set; } // "Nacional" / "Internacional"
+    public EstadoConvenio Estado { get; set; } // "Activo" / "Inactivo"
 }

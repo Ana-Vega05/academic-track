@@ -1,10 +1,12 @@
-﻿namespace AcademicTrack.Domain.Entities;
+﻿using AcademicTrack.Domain.Enums;
+
+namespace AcademicTrack.Domain.Entities;
 
 public class InnovacionVinculacion
 {
     public int Id { get; set; }
     public int InnovacionId { get; set; }
-    public string TipoActor { get; set; } = string.Empty; // "Estudiante", "Docente", "Administrativo"
-    public string Condicion { get; set; } = "Interno"; // "Interno" o "Externo"
+    public TipoActor TipoActor { get; set; } // "Estudiante", "Docente", "Administrativo"
+    public CondicionActor Condicion { get; set; } // "Interno" o "Externo"
     public short Cantidad { get; set; } = 0;
 }

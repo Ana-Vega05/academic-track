@@ -1,4 +1,6 @@
-﻿namespace AcademicTrack.Domain.Entities;
+﻿using AcademicTrack.Domain.Enums;
+
+namespace AcademicTrack.Domain.Entities;
 
 public class GrupoInvestigacion
 {
@@ -6,7 +8,7 @@ public class GrupoInvestigacion
     public int ProgramaId { get; set; }
     public string Nombre { get; set; } = string.Empty;
     public string? Sigla { get; set; }
-    public string? ClasificacionMinciencias { get; set; } // "A1", "A", "B", "C", "D"
+    public ClasificacionMinciencias? ClasificacionMinciencias { get; set; } // "A1", "A", "B", "C", "D"
     public short? NumInvestigadores { get; set; }
     public int? TotalProductos { get; set; }
     public int? ArticulosIndexados { get; set; }
