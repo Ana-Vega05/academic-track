@@ -37,4 +37,18 @@ public class MetaRepository: IMetaRepository
             .OrderBy(x => x.ProgramaId)
             .ThenBy(x => x.FechaLimite)
             .ToListAsync(cancellationToken);
+    
+    public async Task<(IReadOnlyList<Meta> Items, int TotalItems)> ObtenerPaginadoAsync(
+        int? programaId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Metas.AsNoTracking().AsQueryable();
+        if (programaId is not null)
+            query = query.Where(x => x.ProgramaId == programaId);
+
+        query = query.OrderBy(x => x.ProgramaId).ThenBy(x => x.FechaLimite);
+
+        var total = await query.CountAsync(cancellationToken);
+        var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync(cancellationToken);
+        return (items, total);
+    }
 }
