@@ -1,4 +1,5 @@
-﻿using AcademicTrack.Application.Metas.DTOs;
+﻿using AcademicTrack.Application.Commin;
+using AcademicTrack.Application.Metas.DTOs;
 using AcademicTrack.Application.Metas.Interfaces;
 using AcademicTrack.Domain.Entities;
 using AcademicTrack.Domain.Enums;
@@ -18,18 +19,7 @@ public class MetaService
         _evidenciaRepository = evidenciaRepository;
         _indicadorRepository = indicadorRepository;
     }
-
-    public async Task<IReadOnlyList<MetaDto>> ObtenerPorProgramaAsync(
-        int programaId, CancellationToken cancellationToken = default)
-    {
-        var metas = await _metaRepository.ObtenerPorProgramaAsync(programaId, cancellationToken);
-        var resultado = new List<MetaDto>();
-        foreach (var meta in metas)
-        {
-            resultado.Add(await MapearAsync(meta, cancellationToken));
-        }
-        return resultado;
-    }
+    
     
     public async Task<MetaDto> CrearAsync(CrearMetaDto dto, CancellationToken cancellationToken = default)
     {
@@ -42,7 +32,7 @@ public class MetaService
             Nombre = dto.Nombre,
             Descripcion = dto.Descripcion,
             Responsable = dto.Responsable,
-            Periodicidad = Enum.Parse<PeriodicidadMeta>(dto.Periodicidad),
+            Periodicidad = ParseEnum<PeriodicidadMeta>(dto.Periodicidad, nameof(dto.Periodicidad)),
             FechaInicio = dto.FechaInicio,
             FechaLimite = dto.FechaLimite,
             ValorInicial = dto.ValorInicial,
@@ -65,7 +55,7 @@ public class MetaService
 
         if (!string.IsNullOrWhiteSpace(dto.Estado))
         {
-            meta.Estado = Enum.Parse<EstadoMeta>(dto.Estado);
+            meta.Estado = ParseEnum<EstadoMeta>(dto.Estado, nameof(dto.Estado));
         }
         else if (meta.Estado is not (EstadoMeta.Cancelada or EstadoMeta.Cumplida))
         {
@@ -152,8 +142,13 @@ public class MetaService
         if (dto.IndicadorId <= 0) throw new ArgumentException("El indicador debe ser válido.", nameof(dto.IndicadorId));
         if (string.IsNullOrWhiteSpace(dto.Nombre)) throw new ArgumentException("El nombre es obligatorio.", nameof(dto.Nombre));
         if (string.IsNullOrWhiteSpace(dto.Responsable)) throw new ArgumentException("El responsable es obligatorio.", nameof(dto.Responsable));
+        if (string.IsNullOrWhiteSpace(dto.Periodicidad)) throw new ArgumentException("La periodicidad es obligatoria.", nameof(dto.Periodicidad));
         if (dto.FechaLimite < dto.FechaInicio) throw new ArgumentException("La fecha límite no puede ser anterior a la de inicio.", nameof(dto.FechaLimite));
+        ValidarLongitud(dto.Nombre, 200, nameof(dto.Nombre));
+        ValidarLongitud(dto.Responsable, 150, nameof(dto.Responsable));
     }
+    
+    
     
     public async Task<MetaDto?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
     {
@@ -226,6 +221,8 @@ public class MetaService
 
         if (string.IsNullOrWhiteSpace(dto.Descripcion))
             throw new ArgumentException("La descripción de la evidencia es obligatoria.", nameof(dto.Descripcion));
+        ValidarLongitud(dto.Descripcion, 300, nameof(dto.Descripcion));
+        if (dto.Url is not null) ValidarLongitud(dto.Url, 500, nameof(dto.Url));
 
         var evidencia = new MetaEvidencia
         {
@@ -238,12 +235,48 @@ public class MetaService
         await _evidenciaRepository.AgregarAsync(evidencia, cancellationToken);
         return await MapearAsync(meta, cancellationToken); // devuelve la meta con la evidencia ya incluida
     }
-    
+
     private static void ValidarActualizarMeta(ActualizarMetaDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.Nombre)) throw new ArgumentException("El nombre es obligatorio.", nameof(dto.Nombre));
         if (string.IsNullOrWhiteSpace(dto.Responsable)) throw new ArgumentException("El responsable es obligatorio.", nameof(dto.Responsable));
+        if (string.IsNullOrWhiteSpace(dto.Periodicidad)) throw new ArgumentException("La periodicidad es obligatoria.", nameof(dto.Periodicidad));
         if (dto.FechaLimite < dto.FechaInicio) throw new ArgumentException("La fecha límite no puede ser anterior a la de inicio.", nameof(dto.FechaLimite));
+        ValidarLongitud(dto.Nombre, 200, nameof(dto.Nombre));
+        ValidarLongitud(dto.Responsable, 150, nameof(dto.Responsable));
     }
     
+    private static TEnum ParseEnum<TEnum>(string value, string paramName) where TEnum : struct, Enum
+    {
+        var nombreValido = Enum.GetNames<TEnum>()
+            .FirstOrDefault(n => string.Equals(n, value, StringComparison.OrdinalIgnoreCase));
+
+        if (nombreValido is null)
+            throw new ArgumentException(
+                $"Valor '{value}' inválido para {typeof(TEnum).Name}. Valores permitidos: {string.Join(", ", Enum.GetNames<TEnum>())}.",
+                paramName);
+
+        return Enum.Parse<TEnum>(nombreValido);
+    }
+    
+    private static void ValidarLongitud(string valor, int max, string campo)
+    {
+        if (valor.Length > max)
+            throw new ArgumentException($"{campo} no puede superar {max} caracteres.", campo);
+    }
+    
+    public async Task<PagedResult<MetaDto>> ObtenerAsync(
+        int? programaId, int page, int pageSize, CancellationToken cancellationToken = default)
+    {
+        page = Math.Max(page, 1);
+        pageSize = Math.Clamp(pageSize, 1, 100); // tope duro: nadie pide pageSize=1000000
+
+        var (metas, total) = await _metaRepository.ObtenerPaginadoAsync(programaId, page, pageSize, cancellationToken);
+
+        var items = new List<MetaDto>();
+        foreach (var meta in metas)
+            items.Add(await MapearAsync(meta, cancellationToken));
+
+        return new PagedResult<MetaDto> { Items = items, Page = page, PageSize = pageSize, TotalItems = total };
+    }
 }
