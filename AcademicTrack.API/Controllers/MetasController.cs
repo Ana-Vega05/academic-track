@@ -12,11 +12,11 @@ public class MetasController: ControllerBase
     public MetasController(MetaService service) => _service = service;
 
     [HttpGet]
-    public async Task<IActionResult> Obtener([FromQuery] int? programaId, CancellationToken cancellationToken)
-        => Ok(programaId is null
-            ? await _service.ObtenerTodasAsync(cancellationToken)
-            : await _service.ObtenerPorProgramaAsync(programaId.Value, cancellationToken));
-
+    public async Task<IActionResult> Obtener(
+        [FromQuery] int? programaId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+        => Ok(await _service.ObtenerAsync(programaId, page, pageSize, cancellationToken));
+    
     [HttpGet("resumen")]
     public async Task<IActionResult> ObtenerResumen(CancellationToken cancellationToken)
         => Ok(await _service.ObtenerResumenAsync(cancellationToken));
