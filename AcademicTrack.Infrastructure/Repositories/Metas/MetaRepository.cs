@@ -31,4 +31,10 @@ public class MetaRepository: IMetaRepository
         _context.Metas.Update(meta);
         await _context.SaveChangesAsync(cancellationToken);
     }
+    
+    public async Task<IReadOnlyList<Meta>> ObtenerTodasAsync(CancellationToken cancellationToken = default)
+        => await _context.Metas.AsNoTracking()
+            .OrderBy(x => x.ProgramaId)
+            .ThenBy(x => x.FechaLimite)
+            .ToListAsync(cancellationToken);
 }
