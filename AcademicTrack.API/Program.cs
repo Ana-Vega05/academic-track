@@ -18,6 +18,8 @@ builder.Services.AddScoped<MetaService>();
 
 var app = builder.Build();
 
+app.UseMiddleware<AcademicTrack.API.Middlewares.ExceptionHandlingMiddleware>();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
