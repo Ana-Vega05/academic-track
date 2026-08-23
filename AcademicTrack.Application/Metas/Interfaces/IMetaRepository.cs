@@ -8,4 +8,6 @@ public interface IMetaRepository
     Task<Meta?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
     Task<Meta> CrearAsync(Meta meta, CancellationToken cancellationToken = default);
     Task ActualizarAsync(Meta meta, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<Meta>> ObtenerTodasAsync(CancellationToken cancellationToken = default);
+
 }
