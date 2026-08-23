@@ -1,4 +1,7 @@
-﻿using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+﻿using AcademicTrack.Application.Metas.Interfaces;
+using AcademicTrack.Application.Metas.Services;
+using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+using AcademicTrack.Infrastructure.Repositories.Metas;
 using AcademicTrack.Infrastructure.Repositories.StudentAlumni;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +25,11 @@ public static class DependencyInjection
         services.AddScoped<
             ISeguimientoCohorteRepository,
             SeguimientoCohorteRepository>();
+        
+        services.AddScoped<IIndicadorRepository, IIndicadorRepository>();
+        services.AddScoped<IMetaRepository, MetaRepository>();
+        services.AddScoped<IMetaEvidenciaRepository, MetaEvidenciaRepository>();
+        services.AddScoped<MetaService>();
 
         return services;
     }
