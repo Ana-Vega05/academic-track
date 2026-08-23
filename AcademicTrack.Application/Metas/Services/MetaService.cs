@@ -154,6 +154,96 @@ public class MetaService
         if (string.IsNullOrWhiteSpace(dto.Responsable)) throw new ArgumentException("El responsable es obligatorio.", nameof(dto.Responsable));
         if (dto.FechaLimite < dto.FechaInicio) throw new ArgumentException("La fecha límite no puede ser anterior a la de inicio.", nameof(dto.FechaLimite));
     }
+    
+    public async Task<MetaDto?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var meta = await _metaRepository.ObtenerPorIdAsync(id, cancellationToken);
+        return meta is null ? null : await MapearAsync(meta, cancellationToken);
+    }
+    
+    public async Task<IReadOnlyList<MetaDto>> ObtenerTodasAsync(CancellationToken cancellationToken = default)
+    {
+        var metas = await _metaRepository.ObtenerTodasAsync(cancellationToken);
+        var resultado = new List<MetaDto>();
+        foreach (var meta in metas)
+            resultado.Add(await MapearAsync(meta, cancellationToken));
+        return resultado;
+    }
+    
+    public async Task<ResumenMetasDto> ObtenerResumenAsync(CancellationToken cancellationToken = default)
+    {
+        var metas = await ObtenerTodasAsync(cancellationToken);
+        var porPrograma = metas
+            .GroupBy(m => m.ProgramaId)
+            .Select(g => new ResumenProgramaDto
+            {
+                ProgramaId = g.Key,
+                Total = g.Count(),
+                Verde = g.Count(m => m.Semaforo == "Verde"),
+                Amarillo = g.Count(m => m.Semaforo == "Amarillo"),
+                Rojo = g.Count(m => m.Semaforo == "Rojo"),
+                Gris = g.Count(m => m.Semaforo == "Gris")
+            })
+            .OrderBy(r => r.ProgramaId)
+            .ToList();
 
+        return new ResumenMetasDto { PorPrograma = porPrograma };
+    }
+    
+    public async Task<MetaDto?> ActualizarMetaAsync(int id, ActualizarMetaDto dto, CancellationToken cancellationToken = default)
+    {
+        var meta = await _metaRepository.ObtenerPorIdAsync(id, cancellationToken);
+        if (meta is null) return null;
+
+        ValidarActualizarMeta(dto);
+
+        meta.Nombre = dto.Nombre;
+        meta.Descripcion = dto.Descripcion;
+        meta.Responsable = dto.Responsable;
+        meta.Periodicidad = Enum.Parse<PeriodicidadMeta>(dto.Periodicidad);
+        meta.FechaInicio = dto.FechaInicio;
+        meta.FechaLimite = dto.FechaLimite;
+        meta.ValorEsperado = dto.ValorEsperado;
+
+        await _metaRepository.ActualizarAsync(meta, cancellationToken);
+        return await MapearAsync(meta, cancellationToken);
+    }
+    
+    public async Task<MetaDto?> CancelarAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var meta = await _metaRepository.ObtenerPorIdAsync(id, cancellationToken);
+        if (meta is null) return null;
+
+        meta.Estado = EstadoMeta.Cancelada;
+        await _metaRepository.ActualizarAsync(meta, cancellationToken);
+        return await MapearAsync(meta, cancellationToken);
+    }
+    
+    public async Task<MetaDto?> AgregarEvidenciaAsync(int metaId, CrearMetaEvidenciaDto dto, CancellationToken cancellationToken = default)
+    {
+        var meta = await _metaRepository.ObtenerPorIdAsync(metaId, cancellationToken);
+        if (meta is null) return null;
+
+        if (string.IsNullOrWhiteSpace(dto.Descripcion))
+            throw new ArgumentException("La descripción de la evidencia es obligatoria.", nameof(dto.Descripcion));
+
+        var evidencia = new MetaEvidencia
+        {
+            MetaId = metaId,
+            Descripcion = dto.Descripcion,
+            Url = dto.Url,
+            FechaCarga = dto.FechaCarga ?? DateOnly.FromDateTime(DateTime.UtcNow)
+        };
+
+        await _evidenciaRepository.AgregarAsync(evidencia, cancellationToken);
+        return await MapearAsync(meta, cancellationToken); // devuelve la meta con la evidencia ya incluida
+    }
+    
+    private static void ValidarActualizarMeta(ActualizarMetaDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Nombre)) throw new ArgumentException("El nombre es obligatorio.", nameof(dto.Nombre));
+        if (string.IsNullOrWhiteSpace(dto.Responsable)) throw new ArgumentException("El responsable es obligatorio.", nameof(dto.Responsable));
+        if (dto.FechaLimite < dto.FechaInicio) throw new ArgumentException("La fecha límite no puede ser anterior a la de inicio.", nameof(dto.FechaLimite));
+    }
     
 }
