@@ -26,7 +26,7 @@ public static class DependencyInjection
             ISeguimientoCohorteRepository,
             SeguimientoCohorteRepository>();
         
-        services.AddScoped<IIndicadorRepository, IIndicadorRepository>();
+        services.AddScoped<IIndicadorRepository, IndicadorRepository>();
         services.AddScoped<IMetaRepository, MetaRepository>();
         services.AddScoped<IMetaEvidenciaRepository, MetaEvidenciaRepository>();
         services.AddScoped<MetaService>();

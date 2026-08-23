@@ -1,10 +1,11 @@
-﻿using AcademicTrack.Domain.Entities;
+﻿using AcademicTrack.Application.Metas.Interfaces;
+using AcademicTrack.Domain.Entities;
 using AcademicTrack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 namespace AcademicTrack.Infrastructure.Repositories.Metas;
 
-public class IndicadorRepository
+public class IndicadorRepository: IIndicadorRepository
 {
     private readonly AcademicTrackDbContext _context;
     public IndicadorRepository(AcademicTrackDbContext context) => _context = context;
