@@ -1,3 +1,4 @@
+using AcademicTrack.Application.Metas.Services;
 using AcademicTrack.Infrastructure.Persistence;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<SeguimientoCohorteService>();
+builder.Services.AddScoped<MetaService>();
 
 var app = builder.Build();
 
