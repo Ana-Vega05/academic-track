@@ -1,5 +1,7 @@
 ﻿using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+using AcademicTrack.Application.StudentAlumni.Egresados.Interfaces;
 using AcademicTrack.Infrastructure.Repositories.StudentAlumni;
+using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +25,14 @@ public static class DependencyInjection
             ISeguimientoCohorteRepository,
             SeguimientoCohorteRepository>();
 
-        return services;
+         services.AddScoped<
+            ISeguimientoEgresadoRepository,
+            SeguimientoEgresadoRepository>();
+
+        services.AddScoped<
+            IPerdidaAsignaturaRepository,
+            PerdidaAsignaturaRepository>();
+
+return services;
     }
 }

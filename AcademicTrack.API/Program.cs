@@ -1,5 +1,7 @@
 using AcademicTrack.Infrastructure.Persistence;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
+using AcademicTrack.Application.StudentAlumni.Egresados.Services;
+using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -10,7 +12,8 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<SeguimientoCohorteService>();
-
+builder.Services.AddScoped<SeguimientoEgresadoService>();
+builder.Services.AddScoped<PerdidaAsignaturaService>();
 var app = builder.Build();
 app.MapControllers();
 
