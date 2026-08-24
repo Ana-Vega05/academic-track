@@ -11,12 +11,13 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<SeguimientoCohorteService>();
 builder.Services.AddScoped<MetaService>();
 
 var app = builder.Build();
+app.MapControllers();
 
 app.UseMiddleware<AcademicTrack.API.Middlewares.ExceptionHandlingMiddleware>();
 
