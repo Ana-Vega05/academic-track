@@ -1,7 +1,11 @@
-﻿using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+﻿using AcademicTrack.Application.AcademicIndicators.Interfaces;
+using AcademicTrack.Application.Metas.Interfaces;
+using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
 using AcademicTrack.Application.StudentAlumni.Egresados.Interfaces;
-using AcademicTrack.Infrastructure.Repositories.StudentAlumni;
 using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Interfaces;
+using AcademicTrack.Infrastructure.Repositories.AcademicIndicators;
+using AcademicTrack.Infrastructure.Repositories.Metas;
+using AcademicTrack.Infrastructure.Repositories.StudentAlumni;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,7 +18,8 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection")
+        var connectionString = configuration.GetConnectionString(
+            "DefaultConnection")
             ?? throw new InvalidOperationException(
                 "No se encontró la cadena de conexión 'DefaultConnection'.");
 
@@ -25,7 +30,7 @@ public static class DependencyInjection
             ISeguimientoCohorteRepository,
             SeguimientoCohorteRepository>();
 
-         services.AddScoped<
+        services.AddScoped<
             ISeguimientoEgresadoRepository,
             SeguimientoEgresadoRepository>();
 
@@ -33,6 +38,22 @@ public static class DependencyInjection
             IPerdidaAsignaturaRepository,
             PerdidaAsignaturaRepository>();
 
-return services;
+        services.AddScoped<
+            IIndicadorRepository,
+            IndicadorRepository>();
+
+        services.AddScoped<
+            IMetaRepository,
+            MetaRepository>();
+
+        services.AddScoped<
+            IMetaEvidenciaRepository,
+            MetaEvidenciaRepository>();
+
+        services.AddScoped<
+            IAcademicIndicatorsRepository,
+            AcademicIndicatorsRepository>();
+
+        return services;
     }
 }

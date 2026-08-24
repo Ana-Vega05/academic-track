@@ -31,7 +31,10 @@ public class AcademicTrackDbContext : DbContext
     public DbSet<Publicacion> Publicaciones => Set<Publicacion>();
     public DbSet<Autor> Autores => Set<Autor>();
     public DbSet<PublicacionAutor> PublicacionAutores => Set<PublicacionAutor>();
-
+    public DbSet<Indicador> Indicadores => Set<Indicador>();
+    public DbSet<Meta> Metas => Set<Meta>();
+    public DbSet<MetaEvidencia> MetaEvidencias => Set<MetaEvidencia>();
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -532,6 +535,52 @@ modelBuilder.Entity<DistribucionEgresado>(entity =>
                   .OnDelete(DeleteBehavior.Restrict);
 
             entity.HasIndex(e => e.AutorId, "idx_publicacionautor_autor");
+        });
+        
+        modelBuilder.Entity<Indicador>(entity =>
+        {
+            entity.ToTable("indicador");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(150);
+            entity.Property(e => e.Unidad).HasMaxLength(20);
+            entity.Property(e => e.Direccion).IsRequired().HasConversion<string>().HasMaxLength(15);
+            entity.HasIndex(e => e.Nombre).IsUnique();
+        });
+
+        modelBuilder.Entity<Meta>(entity =>
+        {
+            entity.ToTable("meta");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Nombre).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Descripcion).HasColumnType("text");
+            entity.Property(e => e.Responsable).IsRequired().HasMaxLength(150);
+            entity.Property(e => e.Periodicidad).IsRequired().HasConversion<string>().HasMaxLength(15);
+            entity.Property(e => e.FechaInicio).IsRequired();
+            entity.Property(e => e.FechaLimite).IsRequired();
+            entity.Property(e => e.ValorInicial).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.ValorEsperado).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.AvanceActual).HasColumnType("decimal(10,2)");
+            entity.Property(e => e.Estado).IsRequired().HasConversion<string>().HasMaxLength(15)
+                .HasDefaultValue(EstadoMeta.NoIniciada);
+
+            entity.HasOne<Programa>().WithMany().HasForeignKey(e => e.ProgramaId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne<Indicador>().WithMany().HasForeignKey(e => e.IndicadorId).OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.ProgramaId, "idx_meta_programa");
+            entity.HasIndex(e => e.Estado, "idx_meta_estado");
+            entity.HasIndex(e => e.FechaLimite, "idx_meta_fecha_limite");
+        });
+
+        modelBuilder.Entity<MetaEvidencia>(entity =>
+        {
+            entity.ToTable("meta_evidencia");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Descripcion).IsRequired().HasMaxLength(300);
+            entity.Property(e => e.Url).HasMaxLength(500);
+            entity.Property(e => e.FechaCarga).IsRequired();
+
+            entity.HasOne<Meta>().WithMany().HasForeignKey(e => e.MetaId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(e => e.MetaId, "idx_meta_evidencia_meta");
         });
     }
 }
