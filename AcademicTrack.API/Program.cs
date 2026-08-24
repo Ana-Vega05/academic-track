@@ -2,7 +2,12 @@
 using AcademicTrack.Application.AcademicIndicators.Services;
 using AcademicTrack.Application.Metas.Services;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
+
+using AcademicTrack.Application.StudentAlumni.Egresados.Services;
+using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Services;
+
 using AcademicTrack.Infrastructure.Persistence;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,8 +28,13 @@ builder.Services.AddCors(options =>
 builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<SeguimientoCohorteService>();
+
+builder.Services.AddScoped<SeguimientoEgresadoService>();
+builder.Services.AddScoped<PerdidaAsignaturaService>();
+
 builder.Services.AddScoped<MetaService>();
 builder.Services.AddScoped<IAcademicIndicatorsService, AcademicIndicatorsService>();
+
 
 var app = builder.Build();
 

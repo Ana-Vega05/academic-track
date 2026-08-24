@@ -1,5 +1,5 @@
 using AcademicTrack.Application.StudentAlumni.Cohortes.DTOs;
-using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
+using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcademicTrack.API.Controllers;
@@ -8,10 +8,10 @@ namespace AcademicTrack.API.Controllers;
 [Route("api/seguimiento-cohorte")]
 public class SeguimientoCohorteController : ControllerBase
 {
-    private readonly SeguimientoCohorteService _service;
+    private readonly ISeguimientoCohorteService _service;
 
-    public SeguimientoCohorteController(
-        SeguimientoCohorteService service)
+        public SeguimientoCohorteController(
+        ISeguimientoCohorteService service)
     {
         _service = service;
     }
@@ -45,24 +45,41 @@ public class SeguimientoCohorteController : ControllerBase
     }
 
     [HttpGet("analisis/{programaId:int}/{periodoCohorteId:int}")]
-public async Task<IActionResult> AnalizarCohorte(
-    int programaId,
-    int periodoCohorteId)
-{
-    var resultado = await _service.AnalizarCohorteAsync(
-        programaId,
-        periodoCohorteId);
-
-    if (resultado is null)
+    public async Task<IActionResult> AnalizarCohorte(
+        int programaId,
+        int periodoCohorteId,
+        CancellationToken cancellationToken)
     {
-        return NotFound(new
+        var resultado = await _service.AnalizarCohorteAsync(
+            programaId,
+            periodoCohorteId,
+            cancellationToken);
+
+        if (resultado is null)
         {
-            mensaje = "No se encontraron datos para la cohorte."
-        });
+            return NotFound(new
+            {
+                mensaje = "No se encontraron datos para la cohorte."
+            });
+        }
+
+        return Ok(resultado);
     }
 
-    return Ok(resultado);
-}
+
+
+
+[HttpGet("comparacion/{programaId:int}")]
+    public async Task<IActionResult> CompararCohortes(
+        int programaId,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await _service.CompararCohortesAsync(
+            programaId,
+            cancellationToken);
+
+        return Ok(resultado);
+    }
 
 
 }
