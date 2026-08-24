@@ -1,6 +1,8 @@
-﻿using AcademicTrack.Application.Metas.Interfaces;
+﻿using AcademicTrack.Application.AcademicIndicators.Interfaces;
+using AcademicTrack.Application.Metas.Interfaces;
 using AcademicTrack.Application.Metas.Services;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+using AcademicTrack.Infrastructure.Repositories.AcademicIndicators;
 using AcademicTrack.Infrastructure.Repositories.Metas;
 using AcademicTrack.Infrastructure.Repositories.StudentAlumni;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +31,7 @@ public static class DependencyInjection
         services.AddScoped<IIndicadorRepository, IndicadorRepository>();
         services.AddScoped<IMetaRepository, MetaRepository>();
         services.AddScoped<IMetaEvidenciaRepository, MetaEvidenciaRepository>();
+        services.AddScoped<IAcademicIndicatorsRepository, AcademicIndicatorsRepository>();
         services.AddScoped<MetaService>();
 
         return services;
