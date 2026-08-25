@@ -15,11 +15,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<SeguimientoCohorteService>();
 builder.Services.AddScoped<MetaService>();
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Frontend", policy =>
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod());
+});
 var app = builder.Build();
 
 app.UseMiddleware<AcademicTrack.API.Middlewares.ExceptionHandlingMiddleware>();
-
+app.UseCors("Frontend");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
