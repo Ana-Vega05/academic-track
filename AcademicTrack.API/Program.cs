@@ -1,8 +1,8 @@
 ﻿using AcademicTrack.Application.AcademicIndicators.Interfaces;
 using AcademicTrack.Application.AcademicIndicators.Services;
 using AcademicTrack.Application.Metas.Services;
+using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
-
 using AcademicTrack.Application.StudentAlumni.Egresados.Services;
 using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Services;
 
@@ -27,8 +27,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
-builder.Services.AddScoped<SeguimientoCohorteService>();
 
+builder.Services.AddScoped<ISeguimientoCohorteService,SeguimientoCohorteService>();
 builder.Services.AddScoped<SeguimientoEgresadoService>();
 builder.Services.AddScoped<PerdidaAsignaturaService>();
 
