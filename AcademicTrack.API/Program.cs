@@ -5,6 +5,11 @@ using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
 using AcademicTrack.Application.StudentAlumni.Egresados.Services;
 using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Services;
+using AcademicTrack.Application.Programs.Interfaces;
+using AcademicTrack.Application.Programs.Services;
+
+using AcademicTrack.Infrastructure.Repositories.Programs;
+
 
 using AcademicTrack.Infrastructure.Persistence;
 
@@ -32,6 +37,9 @@ builder.Services.AddScoped<ISeguimientoCohorteService,SeguimientoCohorteService>
 builder.Services.AddScoped<SeguimientoEgresadoService>();
 builder.Services.AddScoped<PerdidaAsignaturaService>();
 
+
+builder.Services.AddScoped<IProgramaRepository, ProgramaRepository>();
+builder.Services.AddScoped<IProgramaService, ProgramaService>();
 builder.Services.AddScoped<MetaService>();
 builder.Services.AddScoped<IAcademicIndicatorsService, AcademicIndicatorsService>();
 
