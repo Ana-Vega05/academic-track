@@ -50,10 +50,13 @@ using (var scope = app.Services.CreateScope())
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AcademicTrackDbContext>();
-        db.Database.Migrate();
+       db.Database.Migrate();
 
-        logger.LogInformation("Migraciones de PostgreSQL aplicadas exitosamente.");
-    }
+logger.LogInformation("Migraciones de PostgreSQL aplicadas exitosamente.");
+
+DbInitializer.Seed(db);
+logger.LogInformation("Sembrado de datos iniciales ejecutado exitosamente.");
+       }
     catch (Exception ex)
     {
         logger.LogWarning(
