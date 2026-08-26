@@ -16,4 +16,19 @@ public class AcademicIndicatorsService : IAcademicIndicatorsService
     {
         return await _repository.GetDashboardDataAsync(programName, period, cancellationToken);
     }
+
+    public async Task<UploadIndicatorResultDto> UploadIndicatorFileAsync(string indicatorType, string programName, string period, Stream fileStream, string fileName, long length, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(indicatorType))
+        {
+            throw new ArgumentException("Debe especificar el tipo de indicador a procesar.");
+        }
+
+        if (fileStream == null || length == 0)
+        {
+            throw new ArgumentException("El archivo adjunto está vacío o es inválido.");
+        }
+
+        return await _repository.ProcessIndicatorUploadAsync(indicatorType, programName, period, fileStream, fileName, length, cancellationToken);
+    }
 }

@@ -36,8 +36,13 @@ public class StudentMetricsDto
 public class HistoricEnrolmentDto
 {
     public string Period { get; set; } = string.Empty;
+    public int Inscritos { get; set; }
+    public int Admitidos { get; set; }
     public int Matriculados { get; set; }
     public int Nuevos { get; set; }
+    public int Graduados { get; set; }
+    public int Retirados { get; set; }
+    public double TasaDesercion { get; set; }
 }
 
 public class SemesterBreakdownDto
