@@ -1,4 +1,5 @@
-using AcademicTrack.Domain.Repositories;
+﻿using AcademicTrack.Domain.Repositories;
+using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Dapper;
 
@@ -12,11 +13,14 @@ public class DatabaseUtilities : IDatabaseUtilities
     }
 
     private readonly string _connectionString;
-    public DatabaseUtilities()
+
+    public DatabaseUtilities(IConfiguration configuration)
     {
         _connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
-            ?? throw new InvalidOperationException("No se encontró la variable de entorno 'CONNECTION_STRING'.");
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? "Host=postgres-db;Port=5432;Database=academictrack;Username=academictrack;Password=academictrack_dev";
     }
+
     public async Task<List<T>> ExecuteQuery<T>(string query, DynamicParameters? parameters = null)
     {
         var connection = new NpgsqlConnection(_connectionString);
@@ -26,12 +30,13 @@ public class DatabaseUtilities : IDatabaseUtilities
             await connection.CloseAsync();
             return response.ToList();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await connection.CloseAsync();
             throw;
         }
     }
+
     public async Task<T?> ExecuteQuerySingle<T>(string query, DynamicParameters? parameters = null)
     {
         var connection = new NpgsqlConnection(_connectionString);
@@ -39,12 +44,13 @@ public class DatabaseUtilities : IDatabaseUtilities
         {
             return await connection.QuerySingleOrDefaultAsync<T>(query, parameters);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await connection.CloseAsync();
             throw;
         }
     }
+
     public async Task ExecuteCommandAsync(string command, object? parameters = null)
     {
         var connection = new NpgsqlConnection(_connectionString);
@@ -53,7 +59,7 @@ public class DatabaseUtilities : IDatabaseUtilities
             await connection.ExecuteAsync(command, parameters);
             await connection.CloseAsync();
         }
-        catch (Exception e)
+        catch (Exception)
         {
             await connection.CloseAsync();
             throw;
