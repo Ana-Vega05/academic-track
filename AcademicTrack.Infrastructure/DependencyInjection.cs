@@ -1,6 +1,10 @@
 ﻿using AcademicTrack.Application.Metas.Interfaces;
 using AcademicTrack.Application.Metas.Services;
+using AcademicTrack.Application.Services;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+using AcademicTrack.Domain.Repositories;
+using AcademicTrack.Infrastructure.Persistence.Repositories;
+using AcademicTrack.Infrastructure.Repositories.Activities;
 using AcademicTrack.Infrastructure.Repositories.Metas;
 using AcademicTrack.Infrastructure.Repositories.StudentAlumni;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +26,8 @@ public static class DependencyInjection
         services.AddDbContext<AcademicTrackDbContext>(options =>
             options.UseNpgsql(connectionString));
 
+        services.AddScoped<IDatabaseUtilities, DatabaseUtilities>();
+
         services.AddScoped<
             ISeguimientoCohorteRepository,
             SeguimientoCohorteRepository>();
@@ -30,6 +36,10 @@ public static class DependencyInjection
         services.AddScoped<IMetaRepository, MetaRepository>();
         services.AddScoped<IMetaEvidenciaRepository, MetaEvidenciaRepository>();
         services.AddScoped<MetaService>();
+
+        services.AddScoped<IActivityRepository, ActivityRepository>();
+        services.AddScoped<IActivityEvidenceRepository, ActivityEvidenceRepository>();
+        services.AddScoped<ActivityService>();
 
         return services;
     }

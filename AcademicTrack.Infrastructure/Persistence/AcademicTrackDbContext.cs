@@ -1,4 +1,5 @@
-﻿using AcademicTrack.Domain.Entities;
+﻿using System.Text.Json;
+using AcademicTrack.Domain.Entities;
 using AcademicTrack.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
@@ -34,6 +35,8 @@ public class AcademicTrackDbContext : DbContext
     public DbSet<Indicador> Indicadores => Set<Indicador>();
     public DbSet<Meta> Metas => Set<Meta>();
     public DbSet<MetaEvidencia> MetaEvidencias => Set<MetaEvidencia>();
+    public DbSet<Activity> Activities => Set<Activity>();
+    public DbSet<ActivityEvidence> ActivityEvidences => Set<ActivityEvidence>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -581,6 +584,45 @@ modelBuilder.Entity<DistribucionEgresado>(entity =>
 
             entity.HasOne<Meta>().WithMany().HasForeignKey(e => e.MetaId).OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(e => e.MetaId, "idx_meta_evidencia_meta");
+        });
+
+        modelBuilder.Entity<Activity>(entity =>
+        {
+            entity.ToTable("activity");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Type).IsRequired().HasConversion<string>().HasMaxLength(30);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(300);
+            entity.Property(e => e.Date).IsRequired();
+            entity.Property(e => e.Location).HasMaxLength(200);
+            entity.Property(e => e.Responsible).IsRequired().HasMaxLength(150);
+            entity.Property(e => e.ParticipatingProfessors)
+                .HasColumnType("text")
+                .HasConversion(
+                    v => v.Count == 0 ? null : JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => string.IsNullOrWhiteSpace(v) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>());
+            entity.Property(e => e.ParticipatingStudents)
+                .HasColumnType("text")
+                .HasConversion(
+                    v => v.Count == 0 ? null : JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => string.IsNullOrWhiteSpace(v) ? new List<string>() : JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions?)null) ?? new List<string>());
+            entity.Property(e => e.Description).HasColumnType("text");
+
+            entity.HasOne<Programa>().WithMany().HasForeignKey(e => e.ProgramId).OnDelete(DeleteBehavior.Restrict);
+
+            entity.HasIndex(e => e.ProgramId, "idx_activity_program");
+            entity.HasIndex(e => e.Type, "idx_activity_type");
+            entity.HasIndex(e => e.Date, "idx_activity_date");
+        });
+
+        modelBuilder.Entity<ActivityEvidence>(entity =>
+        {
+            entity.ToTable("activity_evidence");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Url).IsRequired().HasMaxLength(500);
+            entity.Property(e => e.UploadDate).IsRequired();
+
+            entity.HasOne<Activity>().WithMany().HasForeignKey(e => e.ActivityId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(e => e.ActivityId, "idx_activity_evidence_activity");
         });
     }
 }

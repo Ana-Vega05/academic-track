@@ -1,4 +1,5 @@
 using AcademicTrack.Application.Metas.Services;
+using AcademicTrack.Application.Services;
 using AcademicTrack.Infrastructure.Persistence;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,17 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddScoped<SeguimientoCohorteService>();
 builder.Services.AddScoped<MetaService>();
+builder.Services.AddScoped<ActivityService>();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -28,7 +40,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors("AllowFrontend");
 app.MapControllers();
 
 var summaries = new[]
