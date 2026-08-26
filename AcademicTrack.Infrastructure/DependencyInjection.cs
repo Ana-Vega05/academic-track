@@ -1,6 +1,11 @@
 ﻿using AcademicTrack.Application.AcademicIndicators.Interfaces;
 using AcademicTrack.Application.Metas.Interfaces;
+using AcademicTrack.Application.Metas.Services;
+using AcademicTrack.Application.Services;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+using AcademicTrack.Domain.Repositories;
+using AcademicTrack.Infrastructure.Persistence.Repositories;
+using AcademicTrack.Infrastructure.Repositories.Activities;
 using AcademicTrack.Application.StudentAlumni.Egresados.Interfaces;
 using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Interfaces;
 using AcademicTrack.Infrastructure.Repositories.AcademicIndicators;
@@ -25,6 +30,8 @@ public static class DependencyInjection
 
         services.AddDbContext<AcademicTrackDbContext>(options =>
             options.UseNpgsql(connectionString));
+
+        services.AddScoped<IDatabaseUtilities, DatabaseUtilities>();
 
         services.AddScoped<
             ISeguimientoCohorteRepository,
@@ -53,6 +60,10 @@ public static class DependencyInjection
         services.AddScoped<
             IAcademicIndicatorsRepository,
             AcademicIndicatorsRepository>();
+
+        services.AddScoped<IActivityRepository, ActivityRepository>();
+        services.AddScoped<IActivityEvidenceRepository, ActivityEvidenceRepository>();
+        services.AddScoped<ActivityService>();
 
         return services;
     }
