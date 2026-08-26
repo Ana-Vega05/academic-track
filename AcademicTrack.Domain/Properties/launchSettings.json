@@ -1,0 +1,7 @@
+{
+  "profiles": {
+    "AcademicTrack.Domain": {
+      "commandName": "Project"
+    }
+  }
+}
