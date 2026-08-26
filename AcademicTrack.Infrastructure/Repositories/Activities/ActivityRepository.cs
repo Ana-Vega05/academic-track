@@ -1,4 +1,4 @@
-using System.Text.Json;
+﻿using System.Text.Json;
 using AcademicTrack.Domain.Entities;
 using AcademicTrack.Domain.Enums;
 using AcademicTrack.Domain.Repositories;
@@ -9,7 +9,7 @@ namespace AcademicTrack.Infrastructure.Repositories.Activities;
 public class ActivityRepository(IDatabaseUtilities databaseUtilities) : IActivityRepository
 {
     private sealed record ActivityRow(
-        int Id, int ProgramId, ActivityType Type, string Name, DateOnly Date,
+        int Id, int ProgramId, string Type, string Name, DateOnly Date,
         string? Location, string Responsible, string? ParticipatingProfessors,
         string? ParticipatingStudents, string? Description)
     {
@@ -17,7 +17,7 @@ public class ActivityRepository(IDatabaseUtilities databaseUtilities) : IActivit
         {
             Id = Id,
             ProgramId = ProgramId,
-            Type = Type,
+            Type = ParseActivityType(Type),
             Name = Name,
             Date = Date,
             Location = Location,
@@ -26,6 +26,16 @@ public class ActivityRepository(IDatabaseUtilities databaseUtilities) : IActivit
             ParticipatingStudents = DeserializeList(ParticipatingStudents),
             Description = Description
         };
+    }
+
+    private static ActivityType ParseActivityType(string? typeStr)
+    {
+        if (string.IsNullOrWhiteSpace(typeStr)) return ActivityType.ClassroomProject;
+        if (Enum.TryParse<ActivityType>(typeStr, true, out var result))
+            return result;
+        if (int.TryParse(typeStr, out var intResult) && Enum.IsDefined(typeof(ActivityType), intResult))
+            return (ActivityType)intResult;
+        return ActivityType.ClassroomProject;
     }
 
     private const string Columns = """

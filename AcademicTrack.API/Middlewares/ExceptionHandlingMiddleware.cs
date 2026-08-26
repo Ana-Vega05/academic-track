@@ -26,13 +26,13 @@ public class ExceptionHandlingMiddleware
         }
         catch (InvalidOperationException ex)
         {
-            // ej: "el indicador X no existe" — dato inconsistente, no un bug del servidor
             await EscribirProblema(context, HttpStatusCode.UnprocessableEntity, ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error no controlado en {Path}", context.Request.Path);
-            await EscribirProblema(context, HttpStatusCode.InternalServerError, "Ocurrió un error inesperado.");
+            var detail = ex.InnerException != null ? $"{ex.Message} -> {ex.InnerException.Message}" : ex.Message;
+            await EscribirProblema(context, HttpStatusCode.InternalServerError, detail);
         }
     }
 
