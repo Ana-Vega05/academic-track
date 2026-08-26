@@ -1,7 +1,10 @@
 ﻿using AcademicTrack.Application.AcademicIndicators.Interfaces;
 using AcademicTrack.Application.AcademicIndicators.Services;
 using AcademicTrack.Application.Metas.Services;
+using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Services;
+using AcademicTrack.Application.StudentAlumni.Egresados.Services;
+using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Services;
 using AcademicTrack.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,13 +26,16 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddInfrastructure(builder.Configuration);
 
+builder.Services.AddScoped<ISeguimientoCohorteService, SeguimientoCohorteService>();
 builder.Services.AddScoped<SeguimientoCohorteService>();
+builder.Services.AddScoped<SeguimientoEgresadoService>();
+builder.Services.AddScoped<PerdidaAsignaturaService>();
 builder.Services.AddScoped<MetaService>();
 builder.Services.AddScoped<IAcademicIndicatorsService, AcademicIndicatorsService>();
 
 var app = builder.Build();
 
-// Automatically apply pending EF Core migrations on startup if database server is reachable
+// Automatically apply pending EF Core migrations and seed initial data on startup
 using (var scope = app.Services.CreateScope())
 {
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -38,6 +44,9 @@ using (var scope = app.Services.CreateScope())
         var db = scope.ServiceProvider.GetRequiredService<AcademicTrackDbContext>();
         db.Database.Migrate();
         logger.LogInformation("Migraciones de PostgreSQL aplicadas exitosamente.");
+
+        DbInitializer.Seed(db);
+        logger.LogInformation("Sembrado de datos iniciales ejecutado exitosamente.");
     }
     catch (Exception ex)
     {
