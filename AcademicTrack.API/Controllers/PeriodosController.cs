@@ -1,4 +1,5 @@
-﻿using AcademicTrack.Infrastructure.Persistence;
+﻿using AcademicTrack.Domain.Enums;
+using AcademicTrack.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -20,15 +21,15 @@ public class PeriodosController : ControllerBase
     {
         try
         {
-            var dbPeriodos = await _dbContext.PeriodosAcademicos
+            var dbPeriodos = await _dbContext.PeriodoAcademicos
                 .AsNoTracking()
                 .OrderByDescending(p => p.Anio)
                 .ThenByDescending(p => p.Semestre)
                 .Select(p => new
                 {
                     id = p.Id,
-                    anio = p.Anio,
-                    semestre = p.Semestre == (short)1 ? "I" : "II"
+                    anio = (int)p.Anio,
+                    semestre = p.Semestre.ToString()
                 })
                 .ToListAsync(cancellationToken);
 
