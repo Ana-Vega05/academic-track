@@ -3,7 +3,7 @@ using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
 
 namespace AcademicTrack.Application.StudentAlumni.Cohortes.Services;
 
-public class SeguimientoCohorteService
+public class SeguimientoCohorteService : ISeguimientoCohorteService
 {
     private readonly ISeguimientoCohorteRepository _repository;
 
@@ -64,11 +64,13 @@ public class SeguimientoCohorteService
 
     public async Task<AnalisisCohorteDto?> AnalizarCohorteAsync(
     int programaId,
-    int periodoCohorteId)
+    int periodoCohorteId,
+    CancellationToken cancellationToken = default)
 {
     var registros = await _repository.ObtenerPorCohorteAsync(
-        programaId,
-        periodoCohorteId);
+    programaId,
+    periodoCohorteId,
+    cancellationToken);
 
     if (registros.Count == 0)
     {
@@ -130,5 +132,64 @@ public class SeguimientoCohorteService
             semestreMayorDesercion.Desertores
     };
 }
+
+
+public async Task<IReadOnlyList<ComparacionCohorteDto>> CompararCohortesAsync(
+    int programaId,
+    CancellationToken cancellationToken = default)
+{
+    var registros = await _repository.ObtenerComparacionAsync(
+    programaId,
+    cancellationToken);
+    return registros
+        .GroupBy(x => new
+        {
+            x.PeriodoCohorteId,
+            x.Anio,
+            x.Semestre
+        })
+        .Select(grupo =>
+        {
+            var registrosCohorte = grupo
+                .OrderBy(x => x.SemestreSeguimiento)
+                .ToList();
+
+            var primerRegistro = registrosCohorte.First();
+            var ultimoRegistro = registrosCohorte.Last();
+
+            var ingresaron = primerRegistro.Ingresaron;
+            var continuaron = ultimoRegistro.Continuaron;
+            var desertores = registrosCohorte.Sum(x => x.Desertores);
+            var graduados = ultimoRegistro.Graduados;
+
+            return new ComparacionCohorteDto
+            {
+                PeriodoCohorteId = grupo.Key.PeriodoCohorteId,
+                Anio = grupo.Key.Anio,
+                Semestre = grupo.Key.Semestre,
+
+                Ingresaron = ingresaron,
+                Continuaron = continuaron,
+                Desertores = desertores,
+                Graduados = graduados,
+
+                TasaDesercion = ingresaron > 0
+                    ? Math.Round(
+                        (decimal)desertores / ingresaron * 100,
+                        2)
+                    : 0,
+
+                TasaGraduacion = ingresaron > 0
+                    ? Math.Round(
+                        (decimal)graduados / ingresaron * 100,
+                        2)
+                    : 0
+            };
+        })
+        .ToList();
+}
+
+
+
 
 }
