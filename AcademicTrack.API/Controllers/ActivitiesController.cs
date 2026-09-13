@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AcademicTrack.API.Controllers;
 
 [ApiController]
+[Route("api/activities")]
 [Route("activities")]
 public class ActivitiesController(ActivityService service) : ControllerBase
 {
