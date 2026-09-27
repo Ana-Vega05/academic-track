@@ -7,6 +7,7 @@ namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/periodos")]
+[Route("periodos")]
 public class PeriodoController : ControllerBase
 {
     private readonly AcademicTrackDbContext _context;

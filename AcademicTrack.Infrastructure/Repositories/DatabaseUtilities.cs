@@ -1,4 +1,4 @@
-﻿using AcademicTrack.Domain.Repositories;
+using AcademicTrack.Domain.Repositories;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using Dapper;
@@ -16,9 +16,9 @@ public class DatabaseUtilities : IDatabaseUtilities
 
     public DatabaseUtilities(IConfiguration configuration)
     {
-        _connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING")
-            ?? configuration.GetConnectionString("DefaultConnection")
-            ?? "Host=postgres-db;Port=5432;Database=academictrack;Username=academictrack;Password=academictrack_dev";
+        _connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? Environment.GetEnvironmentVariable("CONNECTION_STRING")
+            ?? "Host=localhost;Port=5432;Database=academictrack;Username=academictrack;Password=academictrack_dev";
     }
 
     public async Task<List<T>> ExecuteQuery<T>(string query, DynamicParameters? parameters = null)

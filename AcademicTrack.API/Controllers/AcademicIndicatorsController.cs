@@ -1,4 +1,4 @@
-﻿using AcademicTrack.Application.AcademicIndicators.DTOs;
+using AcademicTrack.Application.AcademicIndicators.DTOs;
 using AcademicTrack.Application.AcademicIndicators.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +6,7 @@ namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/academic-indicators")]
+[Route("academic-indicators")]
 public class AcademicIndicatorsController : ControllerBase
 {
     private readonly IAcademicIndicatorsService _service;
