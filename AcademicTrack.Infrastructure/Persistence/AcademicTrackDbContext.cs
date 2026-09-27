@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using AcademicTrack.Domain.Entities;
 using AcademicTrack.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +37,7 @@ public class AcademicTrackDbContext : DbContext
     public DbSet<MetaEvidencia> MetaEvidencias => Set<MetaEvidencia>();
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<ActivityEvidence> ActivityEvidences => Set<ActivityEvidence>();
+    public DbSet<User> Users => Set<User>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -623,6 +624,23 @@ modelBuilder.Entity<DistribucionEgresado>(entity =>
 
             entity.HasOne<Activity>().WithMany().HasForeignKey(e => e.ActivityId).OnDelete(DeleteBehavior.Cascade);
             entity.HasIndex(e => e.ActivityId, "idx_activity_evidence_activity");
+        });
+
+        modelBuilder.Entity<User>(entity =>
+        {
+            entity.ToTable("users");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Username).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(255);
+            entity.Property(e => e.FullName).IsRequired().HasMaxLength(150);
+            entity.Property(e => e.Role).IsRequired().HasMaxLength(50).HasDefaultValue("Docente");
+            entity.Property(e => e.IsActive).HasDefaultValue(true);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+            entity.Property(e => e.LastLoginAt);
+
+            entity.HasIndex(e => e.Username, "uq_users_username").IsUnique();
+            entity.HasIndex(e => e.Email, "uq_users_email").IsUnique();
         });
     }
 }

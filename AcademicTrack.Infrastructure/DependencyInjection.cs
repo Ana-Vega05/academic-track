@@ -1,4 +1,4 @@
-﻿using AcademicTrack.Application.AcademicIndicators.Interfaces;
+using AcademicTrack.Application.AcademicIndicators.Interfaces;
 using AcademicTrack.Application.Metas.Interfaces;
 using AcademicTrack.Application.Metas.Services;
 using AcademicTrack.Application.Services;
@@ -64,6 +64,9 @@ public static class DependencyInjection
         services.AddScoped<IActivityRepository, ActivityRepository>();
         services.AddScoped<IActivityEvidenceRepository, ActivityEvidenceRepository>();
         services.AddScoped<ActivityService>();
+
+        services.AddScoped<IUserRepository, AcademicTrack.Infrastructure.Repositories.UserRepository>();
+        services.AddScoped<Application.Auth.Interfaces.IJwtService, AcademicTrack.Infrastructure.Services.JwtService>();
 
         return services;
     }
