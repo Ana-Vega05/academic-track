@@ -6,6 +6,7 @@ namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/programas")]
+[Route("programas")]
 public class ProgramaController : ControllerBase
 {
     private readonly IProgramaService _service;

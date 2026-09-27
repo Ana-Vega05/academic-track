@@ -1,4 +1,4 @@
-﻿using AcademicTrack.Application.Metas.DTOs;
+using AcademicTrack.Application.Metas.DTOs;
 using AcademicTrack.Application.Metas.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +6,7 @@ namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/metas")]
+[Route("metas")]
 public class MetasController: ControllerBase
 {
     private readonly MetaService _service;

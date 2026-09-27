@@ -1,4 +1,4 @@
-﻿using AcademicTrack.Application.Metas.DTOs;
+using AcademicTrack.Application.Metas.DTOs;
 using AcademicTrack.Application.Metas.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
@@ -6,6 +6,7 @@ namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/indicadores")]
+[Route("indicadores")]
 public class IndicadoresController: ControllerBase
 {
     private readonly IIndicadorRepository _repository;
