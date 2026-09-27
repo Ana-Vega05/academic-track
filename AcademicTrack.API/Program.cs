@@ -98,6 +98,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<AcademicTrack.Application.Roles.Interfaces.IRoleService, AcademicTrack.Infrastructure.Services.RoleService>();
 
 builder.Services.AddScoped<ISeguimientoCohorteService, SeguimientoCohorteService>();
 builder.Services.AddScoped<SeguimientoEgresadoService>();

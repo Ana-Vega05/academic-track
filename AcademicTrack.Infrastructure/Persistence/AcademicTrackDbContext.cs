@@ -38,6 +38,9 @@ public class AcademicTrackDbContext : DbContext
     public DbSet<Activity> Activities => Set<Activity>();
     public DbSet<ActivityEvidence> ActivityEvidences => Set<ActivityEvidence>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<Role> Roles => Set<Role>();
+    public DbSet<Permission> Permissions => Set<Permission>();
+    public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -635,12 +638,58 @@ modelBuilder.Entity<DistribucionEgresado>(entity =>
             entity.Property(e => e.PasswordHash).IsRequired().HasMaxLength(255);
             entity.Property(e => e.FullName).IsRequired().HasMaxLength(150);
             entity.Property(e => e.Role).IsRequired().HasMaxLength(50).HasDefaultValue("Docente");
+            entity.Property(e => e.RoleId);
             entity.Property(e => e.IsActive).HasDefaultValue(true);
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
             entity.Property(e => e.LastLoginAt);
 
             entity.HasIndex(e => e.Username, "uq_users_username").IsUnique();
             entity.HasIndex(e => e.Email, "uq_users_email").IsUnique();
+
+            entity.HasOne(e => e.UserRole)
+                  .WithMany(r => r.Users)
+                  .HasForeignKey(e => e.RoleId)
+                  .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.ToTable("roles");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(250);
+            entity.Property(e => e.IsSystemRole).HasDefaultValue(false);
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+            entity.HasIndex(e => e.Name, "uq_roles_name").IsUnique();
+        });
+
+        modelBuilder.Entity<Permission>(entity =>
+        {
+            entity.ToTable("permissions");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Code).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.Module).IsRequired().HasMaxLength(50);
+            entity.Property(e => e.Description).HasMaxLength(250);
+
+            entity.HasIndex(e => e.Code, "uq_permissions_code").IsUnique();
+        });
+
+        modelBuilder.Entity<RolePermission>(entity =>
+        {
+            entity.ToTable("role_permissions");
+            entity.HasKey(e => new { e.RoleId, e.PermissionId });
+
+            entity.HasOne(e => e.Role)
+                  .WithMany(r => r.RolePermissions)
+                  .HasForeignKey(e => e.RoleId)
+                  .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(e => e.Permission)
+                  .WithMany(p => p.RolePermissions)
+                  .HasForeignKey(e => e.PermissionId)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

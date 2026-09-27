@@ -17,6 +17,9 @@ public class UserRepository : IUserRepository
     public async Task<User?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
     {
         return await _context.Users
+            .Include(u => u.UserRole)
+                .ThenInclude(r => r!.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
     }
@@ -25,6 +28,9 @@ public class UserRepository : IUserRepository
     {
         var normalized = usernameOrEmail.Trim().ToLowerInvariant();
         return await _context.Users
+            .Include(u => u.UserRole)
+                .ThenInclude(r => r!.RolePermissions)
+                    .ThenInclude(rp => rp.Permission)
             .FirstOrDefaultAsync(u => u.Username.ToLower() == normalized || u.Email.ToLower() == normalized, cancellationToken);
     }
 

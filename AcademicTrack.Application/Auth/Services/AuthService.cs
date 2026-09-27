@@ -50,13 +50,14 @@ public class AuthService : IAuthService
         await _userRepository.UpdateAsync(user);
         await _userRepository.SaveChangesAsync();
 
-        var (token, expiration) = _jwtService.GenerateToken(user);
+        var permissions = GetUserPermissions(user);
+        var (token, expiration) = _jwtService.GenerateToken(user, permissions);
 
         return new AuthResponseDto
         {
             Token = token,
             Expiration = expiration,
-            User = MapToDto(user)
+            User = MapToDto(user, permissions)
         };
     }
 
@@ -119,10 +120,25 @@ public class AuthService : IAuthService
             throw new KeyNotFoundException("Usuario no encontrado o inactivo.");
         }
 
-        return MapToDto(user);
+        var permissions = GetUserPermissions(user);
+        return MapToDto(user, permissions);
     }
 
-    private static UserDto MapToDto(User user)
+    private static List<string> GetUserPermissions(User user)
+    {
+        if (user.UserRole?.RolePermissions == null)
+        {
+            return new List<string>();
+        }
+
+        return user.UserRole.RolePermissions
+            .Where(rp => rp.Permission != null && !string.IsNullOrWhiteSpace(rp.Permission.Code))
+            .Select(rp => rp.Permission.Code)
+            .Distinct()
+            .ToList();
+    }
+
+    private static UserDto MapToDto(User user, List<string>? permissions = null)
     {
         return new UserDto
         {
@@ -130,10 +146,11 @@ public class AuthService : IAuthService
             Username = user.Username,
             Email = user.Email,
             FullName = user.FullName,
-            Role = user.Role,
+            Role = user.UserRole?.Name ?? user.Role,
             IsActive = user.IsActive,
             CreatedAt = user.CreatedAt,
-            LastLoginAt = user.LastLoginAt
+            LastLoginAt = user.LastLoginAt,
+            Permissions = permissions ?? GetUserPermissions(user)
         };
     }
 }

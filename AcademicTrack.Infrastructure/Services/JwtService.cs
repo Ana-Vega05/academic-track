@@ -17,7 +17,7 @@ public class JwtService : IJwtService
         _configuration = configuration;
     }
 
-    public (string Token, DateTime Expiration) GenerateToken(User user)
+    public (string Token, DateTime Expiration) GenerateToken(User user, IEnumerable<string>? permissions = null)
     {
         var secretKey = _configuration["Jwt:Key"] ?? "AcademicTrack_DefaultSecretKey_For_Jwt_Security_Token_2024!";
         var issuer = _configuration["Jwt:Issuer"] ?? "AcademicTrackAPI";
@@ -35,6 +35,17 @@ public class JwtService : IJwtService
             new(ClaimTypes.Role, user.Role),
             new("fullName", user.FullName)
         };
+
+        if (permissions != null)
+        {
+            foreach (var perm in permissions)
+            {
+                if (!string.IsNullOrWhiteSpace(perm))
+                {
+                    claims.Add(new Claim("permission", perm.Trim()));
+                }
+            }
+        }
 
         var expiration = DateTime.UtcNow.AddHours(expirationHours);
 
