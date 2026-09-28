@@ -1,5 +1,7 @@
+using AcademicTrack.API.Infrastructure;
 using AcademicTrack.Application.Metas.DTOs;
 using AcademicTrack.Application.Metas.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcademicTrack.API.Controllers;
@@ -7,22 +9,26 @@ namespace AcademicTrack.API.Controllers;
 [ApiController]
 [Route("api/metas")]
 [Route("metas")]
-public class MetasController: ControllerBase
+[Authorize]
+public class MetasController : ControllerBase
 {
     private readonly MetaService _service;
     public MetasController(MetaService service) => _service = service;
 
     [HttpGet]
+    [RequirePermission("GOALS_VIEW")]
     public async Task<IActionResult> Obtener(
         [FromQuery] int? programaId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20,
         CancellationToken cancellationToken = default)
         => Ok(await _service.ObtenerAsync(programaId, page, pageSize, cancellationToken));
-    
+
     [HttpGet("resumen")]
+    [RequirePermission("GOALS_VIEW")]
     public async Task<IActionResult> ObtenerResumen(CancellationToken cancellationToken)
         => Ok(await _service.ObtenerResumenAsync(cancellationToken));
 
     [HttpGet("{id:int}")]
+    [RequirePermission("GOALS_VIEW")]
     public async Task<IActionResult> ObtenerPorId(int id, CancellationToken cancellationToken)
     {
         var meta = await _service.ObtenerPorIdAsync(id, cancellationToken);
@@ -30,6 +36,7 @@ public class MetasController: ControllerBase
     }
 
     [HttpPost]
+    [RequirePermission("GOALS_MANAGE")]
     public async Task<IActionResult> Crear([FromBody] CrearMetaDto dto, CancellationToken cancellationToken)
     {
         var creada = await _service.CrearAsync(dto, cancellationToken);
@@ -37,6 +44,7 @@ public class MetasController: ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequirePermission("GOALS_MANAGE")]
     public async Task<IActionResult> Actualizar(int id, [FromBody] ActualizarMetaDto dto, CancellationToken cancellationToken)
     {
         var actualizada = await _service.ActualizarMetaAsync(id, dto, cancellationToken);
@@ -44,6 +52,7 @@ public class MetasController: ControllerBase
     }
 
     [HttpPatch("{id:int}/avance")]
+    [RequirePermission("GOALS_MANAGE")]
     public async Task<IActionResult> ActualizarAvance(int id, [FromBody] ActualizarAvanceMetaDto dto, CancellationToken cancellationToken)
     {
         var actualizada = await _service.ActualizarAvanceAsync(id, dto, cancellationToken);
@@ -51,6 +60,7 @@ public class MetasController: ControllerBase
     }
 
     [HttpPatch("{id:int}/cancelar")]
+    [RequirePermission("GOALS_MANAGE")]
     public async Task<IActionResult> Cancelar(int id, CancellationToken cancellationToken)
     {
         var cancelada = await _service.CancelarAsync(id, cancellationToken);
@@ -58,6 +68,7 @@ public class MetasController: ControllerBase
     }
 
     [HttpPost("{id:int}/evidencias")]
+    [RequirePermission("GOALS_MANAGE")]
     public async Task<IActionResult> AgregarEvidencia(int id, [FromBody] CrearMetaEvidenciaDto dto, CancellationToken cancellationToken)
     {
         var actualizada = await _service.AgregarEvidenciaAsync(id, dto, cancellationToken);

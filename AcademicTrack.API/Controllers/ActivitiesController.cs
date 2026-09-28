@@ -1,7 +1,9 @@
+using AcademicTrack.API.Infrastructure;
 using AcademicTrack.Application.Services;
 using AcademicTrack.Domain.Enums;
 using AcademicTrack.Domain.Models.Requests;
 using AcademicTrack.Domain.Models.Responses;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcademicTrack.API.Controllers;
@@ -9,9 +11,11 @@ namespace AcademicTrack.API.Controllers;
 [ApiController]
 [Route("api/activities")]
 [Route("activities")]
+[Authorize]
 public class ActivitiesController(ActivityService service) : ControllerBase
 {
     [HttpGet]
+    [RequirePermission("ACTIVITIES_VIEW")]
     public async Task<IActionResult> Get(
         [FromQuery] int? programId, [FromQuery] ActivityType? type, CancellationToken cancellationToken = default)
     {
@@ -19,6 +23,7 @@ public class ActivitiesController(ActivityService service) : ControllerBase
     }
 
     [HttpGet("{id:int}")]
+    [RequirePermission("ACTIVITIES_VIEW")]
     public async Task<IActionResult> GetById(int id, CancellationToken cancellationToken)
     {
         var activity = await service.GetById(id, cancellationToken);
@@ -26,6 +31,7 @@ public class ActivitiesController(ActivityService service) : ControllerBase
     }
 
     [HttpPost]
+    [RequirePermission("ACTIVITIES_CREATE")]
     public async Task<IActionResult> Create([FromBody] CreateActivityRequest request, CancellationToken cancellationToken)
     {
         var activity = await service.Create(request, cancellationToken);
@@ -33,6 +39,7 @@ public class ActivitiesController(ActivityService service) : ControllerBase
     }
 
     [HttpPut("{id:int}")]
+    [RequirePermission("ACTIVITIES_EDIT")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateActivityRequest request, CancellationToken cancellationToken)
     {
         var updated = await service.Update(id, request, cancellationToken);
@@ -40,6 +47,7 @@ public class ActivitiesController(ActivityService service) : ControllerBase
     }
 
     [HttpDelete("{id:int}")]
+    [RequirePermission("ACTIVITIES_DELETE")]
     public async Task<IActionResult> Delete(int id, CancellationToken cancellationToken)
     {
         var deleted = await service.Delete(id, cancellationToken);
@@ -47,6 +55,7 @@ public class ActivitiesController(ActivityService service) : ControllerBase
     }
 
     [HttpPost("{id:int}/evidences")]
+    [RequirePermission("ACTIVITIES_EDIT", "ACTIVITIES_CREATE")]
     public async Task<IActionResult> AddEvidence(int id, [FromBody] CreateActivityEvidenceRequest dto, CancellationToken cancellationToken)
     {
         var updated = await service.AddEvidence(id, dto, cancellationToken);

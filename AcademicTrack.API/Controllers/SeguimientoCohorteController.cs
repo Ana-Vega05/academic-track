@@ -1,11 +1,15 @@
+using AcademicTrack.API.Infrastructure;
 using AcademicTrack.Application.StudentAlumni.Cohortes.DTOs;
 using AcademicTrack.Application.StudentAlumni.Cohortes.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/seguimiento-cohorte")]
+[Authorize]
+[RequirePermission("INDICATORS_VIEW")]
 public class SeguimientoCohorteController : ControllerBase
 {
     private readonly ISeguimientoCohorteService _service;

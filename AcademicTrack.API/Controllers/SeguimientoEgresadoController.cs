@@ -1,11 +1,15 @@
+using AcademicTrack.API.Infrastructure;
 using AcademicTrack.Application.StudentAlumni.Egresados.DTOs;
 using AcademicTrack.Application.StudentAlumni.Egresados.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/seguimiento-egresado")]
+[Authorize]
+[RequirePermission("INDICATORS_VIEW")]
 public class SeguimientoEgresadoController : ControllerBase
 {
     private readonly SeguimientoEgresadoService _service;

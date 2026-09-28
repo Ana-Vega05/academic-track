@@ -1,5 +1,7 @@
+using AcademicTrack.API.Infrastructure;
 using AcademicTrack.Application.AcademicIndicators.DTOs;
 using AcademicTrack.Application.AcademicIndicators.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcademicTrack.API.Controllers;
@@ -7,6 +9,7 @@ namespace AcademicTrack.API.Controllers;
 [ApiController]
 [Route("api/academic-indicators")]
 [Route("academic-indicators")]
+[Authorize]
 public class AcademicIndicatorsController : ControllerBase
 {
     private readonly IAcademicIndicatorsService _service;
@@ -17,6 +20,7 @@ public class AcademicIndicatorsController : ControllerBase
     }
 
     [HttpGet("dashboard")]
+    [RequirePermission("INDICATORS_VIEW")]
     [ProducesResponseType(typeof(AcademicIndicatorsDashboardDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetDashboard(
         [FromQuery] string? program,
@@ -28,6 +32,7 @@ public class AcademicIndicatorsController : ControllerBase
     }
 
     [HttpPost("upload")]
+    [RequirePermission("INDICATORS_EXPORT")]
     [Consumes("multipart/form-data")]
     [ProducesResponseType(typeof(UploadIndicatorResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

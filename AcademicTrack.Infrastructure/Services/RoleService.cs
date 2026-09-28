@@ -1,3 +1,4 @@
+using AcademicTrack.Application.Auth.Interfaces;
 using AcademicTrack.Application.Roles.DTOs;
 using AcademicTrack.Application.Roles.Interfaces;
 using AcademicTrack.Domain.Entities;
@@ -9,10 +10,12 @@ namespace AcademicTrack.Infrastructure.Services;
 public class RoleService : IRoleService
 {
     private readonly AcademicTrackDbContext _context;
+    private readonly IPasswordHasher _passwordHasher;
 
-    public RoleService(AcademicTrackDbContext context)
+    public RoleService(AcademicTrackDbContext context, IPasswordHasher passwordHasher)
     {
         _context = context;
+        _passwordHasher = passwordHasher;
     }
 
     public async Task<IReadOnlyList<RoleDto>> GetAllRolesAsync(CancellationToken cancellationToken = default)
@@ -239,6 +242,70 @@ public class RoleService : IRoleService
             RoleId = user.RoleId,
             RoleName = role.Name,
             IsActive = user.IsActive
+        };
+    }
+
+    public async Task<UserRoleDto> CreateUserAsync(CreateUserDto dto, CancellationToken cancellationToken = default)
+    {
+        var username = dto.Username?.Trim() ?? string.Empty;
+        var email = dto.Email?.Trim() ?? string.Empty;
+        var fullName = dto.FullName?.Trim() ?? string.Empty;
+        var password = dto.Password?.Trim() ?? string.Empty;
+
+        if (string.IsNullOrWhiteSpace(username))
+            throw new ArgumentException("El nombre de usuario es requerido.");
+        if (string.IsNullOrWhiteSpace(email))
+            throw new ArgumentException("El correo electrónico es requerido.");
+        if (string.IsNullOrWhiteSpace(fullName))
+            throw new ArgumentException("El nombre completo es requerido.");
+        if (string.IsNullOrWhiteSpace(password) || password.Length < 6)
+            throw new ArgumentException("La contraseña debe tener al menos 6 caracteres.");
+
+        var usernameExists = await _context.Users.AnyAsync(u => u.Username.ToLower() == username.ToLower(), cancellationToken);
+        if (usernameExists)
+            throw new InvalidOperationException($"El nombre de usuario '{username}' ya está registrado.");
+
+        var emailExists = await _context.Users.AnyAsync(u => u.Email.ToLower() == email.ToLower(), cancellationToken);
+        if (emailExists)
+            throw new InvalidOperationException($"El correo '{email}' ya está registrado.");
+
+        Role? targetRole = null;
+        if (dto.RoleId.HasValue && dto.RoleId.Value > 0)
+        {
+            targetRole = await _context.Roles.FirstOrDefaultAsync(r => r.Id == dto.RoleId.Value, cancellationToken);
+            if (targetRole == null)
+                throw new KeyNotFoundException($"El rol con ID {dto.RoleId.Value} no fue encontrado.");
+        }
+        else
+        {
+            targetRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Docente", cancellationToken)
+                         ?? await _context.Roles.FirstOrDefaultAsync(cancellationToken);
+        }
+
+        var newUser = new User
+        {
+            Username = username,
+            Email = email,
+            FullName = fullName,
+            PasswordHash = _passwordHasher.HashPassword(password),
+            Role = targetRole?.Name ?? "Docente",
+            RoleId = targetRole?.Id,
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        await _context.Users.AddAsync(newUser, cancellationToken);
+        await _context.SaveChangesAsync(cancellationToken);
+
+        return new UserRoleDto
+        {
+            Id = newUser.Id,
+            Username = newUser.Username,
+            Email = newUser.Email,
+            FullName = newUser.FullName,
+            RoleId = newUser.RoleId,
+            RoleName = newUser.Role,
+            IsActive = newUser.IsActive
         };
     }
 

@@ -12,4 +12,5 @@ public interface IRoleService
     Task<IReadOnlyList<PermissionDto>> GetAllPermissionsAsync(CancellationToken cancellationToken = default);
     Task<IReadOnlyList<UserRoleDto>> GetAllUsersWithRolesAsync(CancellationToken cancellationToken = default);
     Task<UserRoleDto> AssignRoleToUserAsync(int userId, int roleId, CancellationToken cancellationToken = default);
+    Task<UserRoleDto> CreateUserAsync(CreateUserDto dto, CancellationToken cancellationToken = default);
 }

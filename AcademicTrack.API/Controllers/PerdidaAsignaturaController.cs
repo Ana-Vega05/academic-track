@@ -1,11 +1,15 @@
+using AcademicTrack.API.Infrastructure;
 using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.DTOs;
 using AcademicTrack.Application.StudentAlumni.PerdidaAsignaturas.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcademicTrack.API.Controllers;
 
 [ApiController]
 [Route("api/perdida-asignaturas")]
+[Authorize]
+[RequirePermission("INDICATORS_VIEW")]
 public class PerdidaAsignaturaController : ControllerBase
 {
     private readonly PerdidaAsignaturaService _service;

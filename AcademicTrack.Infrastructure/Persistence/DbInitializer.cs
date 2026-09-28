@@ -313,9 +313,10 @@ public static class DbInitializer
             // 7. Sembrado de usuario administrador inicial
             var adminDbRole = context.Roles.FirstOrDefault(r => r.Name == "Administrador");
 
+            var hasher = new AcademicTrack.Application.Auth.Services.PasswordHasher();
+
             if (!context.Users.Any())
             {
-                var hasher = new AcademicTrack.Application.Auth.Services.PasswordHasher();
                 var adminUser = new User
                 {
                     Username = "admin",
@@ -334,15 +335,50 @@ public static class DbInitializer
             }
             else if (adminDbRole != null)
             {
-                // Asegurar que el usuario admin tenga su RoleId vinculado
+                // Asegurar que el superusuario admin mantenga siempre el rol de Administrador
                 var existingAdmin = context.Users.FirstOrDefault(u => u.Username == "admin");
-                if (existingAdmin != null && existingAdmin.RoleId == null)
+                if (existingAdmin != null && (existingAdmin.RoleId != adminDbRole.Id || existingAdmin.Role != adminDbRole.Name))
                 {
                     existingAdmin.RoleId = adminDbRole.Id;
                     existingAdmin.Role = adminDbRole.Name;
                     context.SaveChanges();
                 }
             }
+
+            // Sembrado de usuarios de prueba para verificar restricciones de roles
+            var testDocRole = context.Roles.FirstOrDefault(r => r.Name == "Docente");
+            if (testDocRole != null && !context.Users.Any(u => u.Username == "docente"))
+            {
+                context.Users.Add(new User
+                {
+                    Username = "docente",
+                    Email = "docente@academictrack.edu",
+                    FullName = "Docente Académico",
+                    Role = testDocRole.Name,
+                    RoleId = testDocRole.Id,
+                    PasswordHash = hasher.HashPassword("Docente123*!"),
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            var testConsultRole = context.Roles.FirstOrDefault(r => r.Name == "Consultor");
+            if (testConsultRole != null && !context.Users.Any(u => u.Username == "consultor"))
+            {
+                context.Users.Add(new User
+                {
+                    Username = "consultor",
+                    Email = "consultor@academictrack.edu",
+                    FullName = "Usuario Consultor",
+                    Role = testConsultRole.Name,
+                    RoleId = testConsultRole.Id,
+                    PasswordHash = hasher.HashPassword("Consultor123*!"),
+                    IsActive = true,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
+
+            context.SaveChanges();
         }
         catch (Exception ex)
         {
